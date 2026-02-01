@@ -14,12 +14,14 @@ All notable changes to this project will be documented in this file.
 - Added accessibility improvements (aria-live toasts, focus-visible styles).
 - Hardened copy/export flows (clipboard fallback + revokeObjectURL).
 - Added a shared SVG favicon and linked it across templates to avoid favicon 404s on GitHub Pages.
+- Added a Chinese README describing features, usage, and templates.
 
 Files touched:
 - `AGENTS.md`
 - `CHANGELOG.md`
 - `index.html`
 - `favicon.svg`
+- `README.md`
 - `v1-default/index.html`
 - `v2-glass/index.html`
 - `v3-terminal/index.html`
