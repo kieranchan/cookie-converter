@@ -15,12 +15,17 @@ All notable changes to this project will be documented in this file.
 - Hardened copy/export flows (clipboard fallback + revokeObjectURL).
 - Added a shared SVG favicon and linked it across templates to avoid favicon 404s on GitHub Pages.
 - Added a Chinese README describing features, usage, and templates.
+- Added per-template SVG favicons to match each UI variant.
 
 Files touched:
 - `AGENTS.md`
 - `CHANGELOG.md`
 - `index.html`
 - `favicon.svg`
+- `favicon-v1.svg`
+- `favicon-v2.svg`
+- `favicon-v3.svg`
+- `favicon-v4.svg`
 - `README.md`
 - `v1-default/index.html`
 - `v2-glass/index.html`
