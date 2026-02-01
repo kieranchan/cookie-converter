@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Converter - Glass</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Animated background orbs */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        body::before {
+            width: 600px;
+            height: 600px;
+            background: rgba(255, 100, 200, 0.3);
+            top: -200px;
+            left: -200px;
+        }
+
+        body::after {
+            width: 500px;
+            height: 500px;
+            background: rgba(100, 200, 255, 0.3);
+            bottom: -200px;
+            right: -200px;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 20px) rotate(-5deg); }
+        }
+
+        body[data-theme="alt"] {
+            background: linear-gradient(135deg, #0ea5e9 0%, #10b981 50%, #fb7185 100%);
+        }
+
+        body[data-theme="alt"]::before {
+            background: rgba(14, 165, 233, 0.35);
+        }
+
+        body[data-theme="alt"]::after {
+            background: rgba(16, 185, 129, 0.35);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Glass effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 28px;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .header-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+        }
+
+        .panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 16px;
+        }
+
+        .input-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+            padding: 20px;
+            border: none;
+            border-radius: 16px;
+            background: rgba(0,0,0,0.2);
+            color: white;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            resize: none;
+        }
+
+        textarea::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #764ba2;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 12px;
+            border-radius: 8px;
+        }
+
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.8);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .checkbox input {
+            width: 16px;
+            height: 16px;
+            accent-color: white;
+        }
+
+        /* Output */
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            flex-wrap: wrap;
+        }
+
+        .format-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.85);
+            font-size: 11px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .stats strong {
+            color: white;
+            font-size: 18px;
+            margin-right: 4px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab:hover { color: white; }
+
+        .tab.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .output-content {
+            flex: 1;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .string-output {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: white;
+            word-break: break-all;
+        }
+
+        .export-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .cookie-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .cookie-table th,
+        .cookie-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .cookie-table th {
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cookie-table tbody tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .cookie-name {
+            color: #ffd700;
+            font-family: monospace;
+        }
+
+        .cookie-value {
+            color: rgba(255,255,255,0.7);
+            font-family: monospace;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .badge-secure { background: rgba(34,197,94,0.3); color: #4ade80; }
+        .badge-httponly { background: rgba(59,130,246,0.3); color: #60a5fa; }
+        .badge-samesite { background: rgba(168,85,247,0.3); color: #c084fc; }
+        .badge-session { background: rgba(251,191,36,0.3); color: #fbbf24; }
+        .badge-sensitive { background: rgba(239,68,68,0.3); color: #f87171; }
+        .badge-expired { background: rgba(239,68,68,0.25); color: #fecaca; }
+
+        .domain-group { margin-bottom: 20px; }
+
+        .domain-header {
+            font-weight: 600;
+            color: white;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .domain-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-left: 2px solid rgba(255,255,255,0.2);
+            margin-left: 10px;
+            font-size: 13px;
+        }
+
+        .domain-item:hover {
+            background: rgba(255,255,255,0.05);
+            border-left-color: #ffd700;
+        }
+
+        .warning {
+            background: rgba(251,191,36,0.2);
+            border: 1px solid rgba(251,191,36,0.4);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            color: #fcd34d;
+            font-size: 13px;
+        }
+
+        .empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: rgba(255,255,255,0.4);
+            text-align: center;
+        }
+
+        .empty svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: white;
+            color: #764ba2;
+            padding: 14px 28px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .btn:focus-visible,
+        .icon-btn:focus-visible,
+        .tab:focus-visible {
+            outline: 2px solid rgba(255,255,255,0.5);
+            outline-offset: 2px;
+        }
+
+        @media (max-width: 900px) {
+            .main { grid-template-columns: 1fr; }
+            .panel { min-height: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header glass">
+            <div class="logo">
+                <div class="logo-icon">🍪</div>
+                <span>Cookie Converter</span>
+            </div>
+            <div class="header-btns">
+                <button class="icon-btn" onclick="toggleTheme()" title="主题" aria-label="切换主题">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="panel glass">
+                <div class="panel-title">Input</div>
+                <div class="input-wrap">
+                    <textarea id="input" placeholder="Paste cookie data here...
+
+Supported formats:
+• Browser DevTools table
+• JSON array
+• Netscape cookies.txt"></textarea>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-primary" onclick="convert()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                        Convert
+                    </button>
+                    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+                    <button class="btn btn-ghost" onclick="loadExample()">Example</button>
+                    <label class="checkbox">
+                        <input type="checkbox" id="urlDecode" checked>
+                        URL Decode
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel glass">
+                <div class="output-header">
+                    <div class="panel-title" style="margin:0">Output</div>
+                    <div class="stats" id="stats" style="display:none">
+                        <span class="format-pill" id="formatLabel">AUTO</span>
+                        <span><strong id="count">0</strong> cookies</span>
+                        <span><strong id="domains">0</strong> domains</span>
+                    </div>
+                </div>
+
+                <div class="tabs" id="tabs" style="display:none;margin-bottom:16px">
+                    <button class="tab active" data-view="string">String</button>
+                    <button class="tab" data-view="table">Table</button>
+                    <button class="tab" data-view="domain">Domain</button>
+                </div>
+
+                <div class="output-content">
+                    <div id="empty" class="empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18M9 21V9"/>
+                        </svg>
+                        <div>Paste data on the left</div>
+                        <div style="font-size:12px;margin-top:4px;opacity:0.7">Ctrl+Enter to convert</div>
+                    </div>
+
+                    <div id="output" style="display:none">
+                        <div id="warning" class="warning" style="display:none"></div>
+
+                        <div id="viewString" class="view active">
+                            <div class="string-output" id="stringOut"></div>
+                            <div class="export-btns">
+                                <button class="btn btn-primary btn-sm" onclick="copy()">Copy</button>
+                                <button class="btn btn-ghost btn-sm" onclick="exportAs('json')">JSON</button>
+                                <button class="btn btn-ghost btn-sm" onclick="exportAs('netscape')">Netscape</button>
+                                <button class="btn btn-ghost btn-sm" onclick="exportAs('curl')">cURL</button>
+                            </div>
+                        </div>
+
+                        <div id="viewTable" class="view">
+                            <table class="cookie-table">
+                                <thead><tr><th>Name</th><th>Value</th><th>Domain</th><th>Flags</th></tr></thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+
+                        <div id="viewDomain" class="view">
+                            <div id="domainGroups"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <script>
+        let cookies = [];
+        const SENS = ['session','token','auth','key','secret','password','jwt'];
+        const THEME_KEY = 'cookie_theme_glass';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem(THEME_KEY);
+            if (savedTheme === 'alt') document.body.dataset.theme = 'alt';
+
+            document.querySelectorAll('.tab').forEach(t => {
+                t.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+                    t.classList.add('active');
+                    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                    document.getElementById('view' + capitalize(t.dataset.view)).classList.add('active');
+                });
+            });
+
+            document.getElementById('input').addEventListener('keydown', e => {
+                if (e.ctrlKey && e.key === 'Enter') convert();
+            });
+
+            document.getElementById('urlDecode').addEventListener('change', () => { if (cookies.length) render(); });
+        });
+
+        function toggleTheme() {
+            const isAlt = document.body.dataset.theme === 'alt';
+            if (isAlt) {
+                document.body.removeAttribute('data-theme');
+                localStorage.removeItem(THEME_KEY);
+                toast('Theme: Original');
+            } else {
+                document.body.dataset.theme = 'alt';
+                localStorage.setItem(THEME_KEY, 'alt');
+                toast('Theme: Aurora');
+            }
+        }
+
+        function convert() {
+            const input = document.getElementById('input').value;
+            if (!input.trim()) { toast('Please enter data'); return; }
+            try {
+                const fmt = detectFormat(input);
+                cookies = parse(input);
+                if (!cookies.length) { toast('No valid cookies found'); return; }
+                document.getElementById('empty').style.display = 'none';
+                document.getElementById('output').style.display = 'block';
+                document.getElementById('stats').style.display = 'flex';
+                document.getElementById('tabs').style.display = 'flex';
+                updateFormatLabel(fmt);
+                render();
+            } catch (e) { toast('Parse error: ' + e.message); }
+        }
+
+        function detectFormat(t) {
+            const s = t.trim();
+            if (!s) return 'unknown';
+            if (s.startsWith('[') || s.startsWith('{')) return 'json';
+            if (s.includes('# Netscape') || /^(TRUE|FALSE)\t/.test(s.split('\n')[0])) return 'netscape';
+            return 'table';
+        }
+
+        function updateFormatLabel(fmt) {
+            const map = { json: 'JSON', netscape: 'Netscape', table: 'Table', unknown: 'AUTO' };
+            const el = document.getElementById('formatLabel');
+            if (el) el.textContent = map[fmt] || fmt;
+        }
+
+        function parse(t) {
+            t = t.trim();
+            if (t.startsWith('[') || t.startsWith('{')) {
+                let d = JSON.parse(t);
+                if (!Array.isArray(d)) d = [d];
+                return d.map(c => ({ name: c.name||'', value: c.value||'', domain: c.domain||'', path: c.path||'/', expires: c.expirationDate ? new Date(c.expirationDate*1000).toISOString() : (c.expires||''), httpOnly: c.httpOnly, secure: c.secure, sameSite: c.sameSite||'' })).filter(c => c.name);
+            }
+            if (t.includes('# Netscape') || /^(TRUE|FALSE)\t/.test(t.split('\n')[0])) {
+                const arr = [];
+                for (const line of t.split('\n')) {
+                    const tr = line.trim();
+                    if (!tr || tr.startsWith('#')) continue;
+                    const p = tr.split('\t');
+                    if (p.length >= 7) arr.push({ name: p[5], value: p[6], domain: p[0], path: p[2], expires: p[4]!=='0'?new Date(p[4]*1000).toISOString():'Session', httpOnly: p[1]==='TRUE', secure: p[3]==='TRUE', sameSite: '' });
+                }
+                return arr;
+            }
+            const arr = [], seen = new Map();
+            for (const line of t.split('\n')) {
+                const tr = line.trim();
+                if (!tr || tr.startsWith('#')) continue;
+                const p = tr.includes('\t') ? tr.split('\t') : tr.split(/  +/);
+                if (p.length < 2) continue;
+                const name = p[0].trim(), value = p[1].trim();
+                if (!/^[a-zA-Z0-9!#$%&'*+\-.^_`|~]+$/.test(name)) continue;
+                const c = { name, value, domain: p[2]?.trim()||'', path: p[3]?.trim()||'/', expires: p[4]?.trim()||'', httpOnly: p[6]?.includes('✓'), secure: p[7]?.includes('✓'), sameSite: p[8]?.trim()||'' };
+                seen.has(name) ? arr[seen.get(name)] = c : (seen.set(name, arr.length), arr.push(c));
+            }
+            return arr;
+        }
+
+        function render() {
+            const decode = document.getElementById('urlDecode').checked;
+            const doms = new Set(cookies.map(c => c.domain));
+            document.getElementById('count').textContent = cookies.length;
+            document.getElementById('domains').textContent = doms.size;
+
+            const sens = cookies.filter(c => SENS.some(k => c.name.toLowerCase().includes(k)));
+            const w = document.getElementById('warning');
+            if (sens.length) { w.innerHTML = `⚠️ <strong>${sens.length}</strong> sensitive cookies detected`; w.style.display = 'block'; }
+            else w.style.display = 'none';
+
+            document.getElementById('stringOut').textContent = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+            document.getElementById('tableBody').innerHTML = cookies.map(c => {
+                const v = decode ? tryDecode(c.value) : c.value;
+                const isSens = SENS.some(k => c.name.toLowerCase().includes(k));
+                const expired = c.expires && c.expires !== 'Session' && new Date(c.expires) < new Date();
+                return `<tr>
+                    <td class="cookie-name">${esc(c.name)}${isSens?' <span class="badge badge-sensitive">!</span>':''}</td>
+                    <td class="cookie-value" title="${esc(c.value)}">${esc(v)}</td>
+                    <td>${esc(c.domain)}</td>
+                    <td>
+                        ${c.secure?'<span class="badge badge-secure">S</span>':''}
+                        ${c.httpOnly?'<span class="badge badge-httponly">H</span>':''}
+                        ${c.sameSite?'<span class="badge badge-samesite">'+c.sameSite[0]+'</span>':''}
+                        ${(!c.expires || c.expires === 'Session')?'<span class="badge badge-session">Sess</span>':''}
+                        ${expired?'<span class="badge badge-expired">Exp</span>':''}
+                    </td>
+                </tr>`;
+            }).join('');
+
+            const groups = {};
+            cookies.forEach(c => { const d = c.domain||'(unknown)'; (groups[d]=groups[d]||[]).push(c); });
+            document.getElementById('domainGroups').innerHTML = Object.keys(groups).sort().map(d => `
+                <div class="domain-group">
+                    <div class="domain-header">${esc(d)} (${groups[d].length})</div>
+                    ${groups[d].map(c => `<div class="domain-item"><span class="cookie-name">${esc(c.name)}</span><span class="cookie-value">${esc(decode?tryDecode(c.value):c.value)}</span></div>`).join('')}
+                </div>
+            `).join('');
+        }
+
+        function copy() {
+            navigator.clipboard.writeText(document.getElementById('stringOut').textContent)
+                .then(() => toast('Copied!'))
+                .catch(() => toast('Copy failed'));
+        }
+
+        function toEpoch(expires) {
+            if (!expires || expires === 'Session') return 0;
+            const d = new Date(expires);
+            return Number.isNaN(d.getTime()) ? 0 : Math.floor(d.getTime() / 1000);
+        }
+
+        function exportAs(f) {
+            let content, name;
+            if (f === 'json') { content = JSON.stringify(cookies, null, 2); name = 'cookies.json'; }
+            else if (f === 'netscape') {
+                content = '# Netscape HTTP Cookie File\n' + cookies.map(c => `${c.domain}\tTRUE\t${c.path}\t${c.secure?'TRUE':'FALSE'}\t${toEpoch(c.expires)}\t${c.name}\t${c.value}`).join('\n');
+                name = 'cookies.txt';
+            } else {
+                content = `curl -H "Cookie: ${cookies.map(c=>`${c.name}=${c.value}`).join('; ')}" [URL]`;
+                name = 'curl.txt';
+            }
+            const a = document.createElement('a');
+            const url = URL.createObjectURL(new Blob([content]));
+            a.href = url;
+            a.download = name;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 0);
+            toast('Exported!');
+        }
+
+        function clearAll() {
+            document.getElementById('input').value = '';
+            document.getElementById('empty').style.display = 'flex';
+            document.getElementById('output').style.display = 'none';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('tabs').style.display = 'none';
+            updateFormatLabel('unknown');
+            cookies = [];
+        }
+
+        function loadExample() {
+            document.getElementById('input').value = `_device_id\t53a0425c0b0f99d4f9765e78ddbe7f94\tgithub.com\t/\t2027-01-31\t42\t✓\t✓\tLax
+user_session\tDqo5rQjCPvdBGp7SL7EOwI\tgithub.com\t/\t2026-02-14\t60\t✓\t✓\tStrict
+logged_in\tyes\t.github.com\t/\t2027-01-31\t12\t✓\t✓\tLax`;
+            toast('Example loaded');
+        }
+
+        function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+        function tryDecode(s) { try { return decodeURIComponent(s); } catch { return s; } }
+        function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    </script>
+</body>
+</html>

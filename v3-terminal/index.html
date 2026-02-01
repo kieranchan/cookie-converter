@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Converter - Terminal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0a;
+            --bg-term: #0d1117;
+            --green: #00ff41;
+            --green-dim: #00cc33;
+            --green-dark: #003311;
+            --cyan: #00ffff;
+            --yellow: #ffff00;
+            --red: #ff4136;
+            --gray: #666;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--green);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* CRT effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Glow effect */
+        .glow {
+            text-shadow: 0 0 5px var(--green), 0 0 10px var(--green);
+        }
+
+        .glow-cyan {
+            color: var(--cyan);
+            text-shadow: 0 0 5px var(--cyan), 0 0 10px var(--cyan);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-term);
+            border-bottom: 1px solid var(--green-dark);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .title-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        .title {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .status {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .status span {
+            color: var(--green);
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--green-dark);
+            overflow: hidden;
+        }
+
+        .panel:last-child {
+            border-right: none;
+        }
+
+        .panel-header {
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--green-dark);
+            font-size: 11px;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-header span {
+            color: var(--green);
+        }
+
+        .panel-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Input */
+        .input-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prompt {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            color: var(--green);
+            font-size: 13px;
+            z-index: 1;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            padding: 12px 16px 12px 32px;
+            border: none;
+            background: var(--bg-term);
+            color: var(--green);
+            font-family: inherit;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: none;
+            caret-color: var(--green);
+        }
+
+        textarea::placeholder {
+            color: var(--gray);
+        }
+
+        textarea:focus {
+            outline: none;
+        }
+
+        .cmd-bar {
+            padding: 12px 16px;
+            border-top: 1px solid var(--green-dark);
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .cmd {
+            padding: 6px 14px;
+            border: 1px solid var(--green-dark);
+            border-radius: 0;
+            background: transparent;
+            color: var(--green);
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .cmd:hover {
+            background: var(--green-dark);
+            border-color: var(--green);
+        }
+
+        .cmd-primary {
+            background: var(--green);
+            color: var(--bg);
+            border-color: var(--green);
+        }
+
+        .cmd-primary:hover {
+            background: var(--green-dim);
+        }
+
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--gray);
+            cursor: pointer;
+        }
+
+        .checkbox input {
+            accent-color: var(--green);
+        }
+
+        /* Output */
+        .output-wrap {
+            flex: 1;
+            overflow: auto;
+            padding: 12px 16px;
+            background: var(--bg-term);
+        }
+
+        .line {
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .line-prompt {
+            color: var(--green);
+        }
+
+        .line-info {
+            color: var(--cyan);
+        }
+
+        .line-warn {
+            color: var(--yellow);
+        }
+
+        .line-error {
+            color: var(--red);
+        }
+
+        .line-dim {
+            color: var(--gray);
+        }
+
+        .empty-output {
+            color: var(--gray);
+            font-size: 12px;
+        }
+
+        .empty-output .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: var(--green);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .output-toolbar {
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--green-dark);
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .format-pill {
+            padding: 2px 8px;
+            border: 1px dashed var(--cyan);
+            color: var(--cyan);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .tab {
+            padding: 4px 12px;
+            border: 1px solid var(--green-dark);
+            background: transparent;
+            color: var(--gray);
+            font-family: inherit;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .tab:hover { color: var(--green); }
+
+        .tab.active {
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 200px;
+            padding: 4px 8px;
+            border: 1px solid var(--green-dark);
+            background: transparent;
+            color: var(--green);
+            font-family: inherit;
+            font-size: 11px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--green);
+        }
+
+        .search-input::placeholder {
+            color: var(--gray);
+        }
+
+        /* String View */
+        .string-box {
+            background: var(--bg);
+            border: 1px solid var(--green-dark);
+            padding: 12px;
+            font-size: 12px;
+            word-break: break-all;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        /* Table */
+        .table-wrap {
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--green-dark);
+        }
+
+        th {
+            color: var(--gray);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        tr:hover {
+            background: rgba(0, 255, 65, 0.05);
+        }
+
+        .name { color: var(--cyan); }
+        .value {
+            color: var(--gray);
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .flag {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 9px;
+            margin-right: 4px;
+            border: 1px solid;
+        }
+
+        .flag-s { border-color: #27c93f; color: #27c93f; }
+        .flag-h { border-color: #00bfff; color: #00bfff; }
+        .flag-l { border-color: #9966ff; color: #9966ff; }
+        .flag-sess { border-color: var(--yellow); color: var(--yellow); }
+        .flag-sens { border-color: var(--red); color: var(--red); }
+        .flag-exp { border-color: var(--red); color: var(--red); }
+
+        /* Domain */
+        .domain-section { margin-bottom: 16px; }
+
+        .domain-title {
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--green-dark);
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .domain-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0 4px 16px;
+            font-size: 12px;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .cmd:focus-visible,
+        .tab:focus-visible,
+        .search-input:focus-visible {
+            outline: 2px solid var(--green);
+            outline-offset: 2px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--green);
+            color: var(--bg);
+            padding: 10px 24px;
+            font-size: 12px;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 800px) {
+            .main { grid-template-columns: 1fr; }
+            .panel { border-right: none; border-bottom: 1px solid var(--green-dark); min-height: 40vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="title-bar">
+                <div class="dots">
+                    <div class="dot dot-red"></div>
+                    <div class="dot dot-yellow"></div>
+                    <div class="dot dot-green"></div>
+                </div>
+                <span class="title">cookie_converter — bash</span>
+            </div>
+            <div class="status">cookies: <span id="statusCount">0</span> | domains: <span id="statusDomains">0</span></div>
+        </header>
+
+        <main class="main">
+            <div class="panel">
+                <div class="panel-header">
+                    <span>INPUT</span>
+                    <span style="color:var(--gray)">~/cookies</span>
+                </div>
+                <div class="panel-body">
+                    <div class="input-area">
+                        <span class="prompt">$</span>
+                        <textarea id="input" placeholder="# Paste cookie data here...
+# Supports: table, JSON, Netscape format
+
+# Example:
+# name    value    domain    path    expires    size    httpOnly    secure"></textarea>
+                    </div>
+                    <div class="cmd-bar">
+                        <button class="cmd cmd-primary" onclick="convert()">./convert.sh</button>
+                        <button class="cmd" onclick="clearAll()">clear</button>
+                        <button class="cmd" onclick="loadExample()">cat example.txt</button>
+                        <label class="checkbox">
+                            <input type="checkbox" id="urlDecode" checked>
+                            --decode
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span>OUTPUT</span>
+                    <span style="color:var(--gray)">stdout</span>
+                </div>
+                <div class="panel-body">
+                    <div class="output-toolbar" id="toolbar" style="display:none">
+                        <span class="format-pill" id="formatLabel">AUTO</span>
+                        <button class="tab active" data-view="string">string</button>
+                        <button class="tab" data-view="table">table</button>
+                        <button class="tab" data-view="domain">domain</button>
+                        <input class="search-input" type="text" id="search" placeholder="grep..." oninput="render()">
+                    </div>
+                    <div class="output-wrap">
+                        <div id="empty">
+                            <div class="line line-prompt">$ ./convert.sh</div>
+                            <div class="line empty-output">Waiting for input...<span class="cursor"></span></div>
+                        </div>
+
+                        <div id="output" style="display:none">
+                            <div id="log"></div>
+
+                            <div id="viewString" class="view active">
+                                <div class="string-box" id="stringOut"></div>
+                                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                                    <button class="cmd cmd-primary" onclick="copy()">cp > clipboard</button>
+                                    <button class="cmd" onclick="exportAs('json')">export json</button>
+                                    <button class="cmd" onclick="exportAs('netscape')">export netscape</button>
+                                    <button class="cmd" onclick="exportAs('curl')">export curl</button>
+                                </div>
+                            </div>
+
+                            <div id="viewTable" class="view">
+                                <div class="table-wrap">
+                                    <table>
+                                        <thead><tr><th>Name</th><th>Value</th><th>Domain</th><th>Flags</th></tr></thead>
+                                        <tbody id="tableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div id="viewDomain" class="view">
+                                <div id="domainGroups"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <script>
+        let cookies = [];
+        const SENS = ['session','token','auth','key','secret','password','jwt'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.tab').forEach(t => {
+                t.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+                    t.classList.add('active');
+                    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                    document.getElementById('view' + capitalize(t.dataset.view)).classList.add('active');
+                });
+            });
+
+            document.getElementById('input').addEventListener('keydown', e => {
+                if (e.ctrlKey && e.key === 'Enter') convert();
+            });
+
+            document.getElementById('urlDecode').addEventListener('change', () => { if (cookies.length) render(); });
+        });
+
+        function log(lines) {
+            document.getElementById('log').innerHTML = lines.map(l => `<div class="line ${l.type}">${l.text}</div>`).join('');
+        }
+
+        function convert() {
+            const input = document.getElementById('input').value;
+            if (!input.trim()) { toast('No input'); return; }
+
+            const logs = [
+                { type: 'line-prompt', text: '$ ./convert.sh' },
+                { type: 'line-info', text: '[INFO] Parsing input...' }
+            ];
+
+            try {
+                const fmt = detectFormat(input);
+                cookies = parse(input);
+                if (!cookies.length) {
+                    logs.push({ type: 'line-error', text: '[ERROR] No valid cookies found' });
+                    log(logs);
+                    return;
+                }
+
+                const doms = new Set(cookies.map(c => c.domain));
+                logs.push({ type: 'line-info', text: `[INFO] Found ${cookies.length} cookies from ${doms.size} domains` });
+
+                const sens = cookies.filter(c => SENS.some(k => c.name.toLowerCase().includes(k)));
+                if (sens.length) logs.push({ type: 'line-warn', text: `[WARN] ${sens.length} sensitive cookie(s) detected!` });
+
+                logs.push({ type: 'line-dim', text: '---' });
+
+                log(logs);
+                document.getElementById('empty').style.display = 'none';
+                document.getElementById('output').style.display = 'block';
+                document.getElementById('toolbar').style.display = 'flex';
+                updateFormatLabel(fmt);
+                render();
+            } catch (e) {
+                logs.push({ type: 'line-error', text: `[ERROR] ${e.message}` });
+                log(logs);
+            }
+        }
+
+        function detectFormat(t) {
+            const s = t.trim();
+            if (!s) return 'unknown';
+            if (s.startsWith('[') || s.startsWith('{')) return 'json';
+            if (s.includes('# Netscape') || /^(TRUE|FALSE)\t/.test(s.split('\n')[0])) return 'netscape';
+            return 'table';
+        }
+
+        function updateFormatLabel(fmt) {
+            const map = { json: 'JSON', netscape: 'Netscape', table: 'Table', unknown: 'AUTO' };
+            const el = document.getElementById('formatLabel');
+            if (el) el.textContent = map[fmt] || fmt;
+        }
+
+        function parse(t) {
+            t = t.trim();
+            if (t.startsWith('[') || t.startsWith('{')) {
+                let d = JSON.parse(t);
+                if (!Array.isArray(d)) d = [d];
+                return d.map(c => ({ name: c.name||'', value: c.value||'', domain: c.domain||'', path: c.path||'/', expires: c.expirationDate ? new Date(c.expirationDate*1000).toISOString() : (c.expires||''), httpOnly: c.httpOnly, secure: c.secure, sameSite: c.sameSite||'' })).filter(c => c.name);
+            }
+            if (t.includes('# Netscape') || /^(TRUE|FALSE)\t/.test(t.split('\n')[0])) {
+                const arr = [];
+                for (const line of t.split('\n')) {
+                    const tr = line.trim();
+                    if (!tr || tr.startsWith('#')) continue;
+                    const p = tr.split('\t');
+                    if (p.length >= 7) arr.push({ name: p[5], value: p[6], domain: p[0], path: p[2], expires: p[4]!=='0'?new Date(p[4]*1000).toISOString():'Session', httpOnly: p[1]==='TRUE', secure: p[3]==='TRUE', sameSite: '' });
+                }
+                return arr;
+            }
+            const arr = [], seen = new Map();
+            for (const line of t.split('\n')) {
+                const tr = line.trim();
+                if (!tr || tr.startsWith('#')) continue;
+                const p = tr.includes('\t') ? tr.split('\t') : tr.split(/  +/);
+                if (p.length < 2) continue;
+                const name = p[0].trim(), value = p[1].trim();
+                if (!/^[a-zA-Z0-9!#$%&'*+\-.^_`|~]+$/.test(name)) continue;
+                const c = { name, value, domain: p[2]?.trim()||'', path: p[3]?.trim()||'/', expires: p[4]?.trim()||'', httpOnly: p[6]?.includes('✓'), secure: p[7]?.includes('✓'), sameSite: p[8]?.trim()||'' };
+                seen.has(name) ? arr[seen.get(name)] = c : (seen.set(name, arr.length), arr.push(c));
+            }
+            return arr;
+        }
+
+        function render() {
+            const decode = document.getElementById('urlDecode').checked;
+            const search = document.getElementById('search').value.toLowerCase();
+            const filtered = cookies.filter(c => c.name.toLowerCase().includes(search) || c.value.toLowerCase().includes(search) || c.domain.toLowerCase().includes(search));
+
+            const doms = new Set(filtered.map(c => c.domain));
+            document.getElementById('statusCount').textContent = filtered.length;
+            document.getElementById('statusDomains').textContent = doms.size;
+
+            document.getElementById('stringOut').textContent = filtered.map(c => `${c.name}=${c.value}`).join('; ');
+
+            document.getElementById('tableBody').innerHTML = filtered.map(c => {
+                const v = decode ? tryDecode(c.value) : c.value;
+                const isSens = SENS.some(k => c.name.toLowerCase().includes(k));
+                const expired = c.expires && c.expires !== 'Session' && new Date(c.expires) < new Date();
+                return `<tr>
+                    <td class="name">${esc(c.name)}${isSens?' <span class="flag flag-sens">!</span>':''}</td>
+                    <td class="value" title="${esc(c.value)}">${esc(v)}</td>
+                    <td>${esc(c.domain)}</td>
+                    <td>
+                        ${c.secure?'<span class="flag flag-s">S</span>':''}
+                        ${c.httpOnly?'<span class="flag flag-h">H</span>':''}
+                        ${c.sameSite?'<span class="flag flag-l">'+c.sameSite[0]+'</span>':''}
+                        ${(!c.expires || c.expires === 'Session')?'<span class="flag flag-sess">SESS</span>':''}
+                        ${expired?'<span class="flag flag-exp">EXP</span>':''}
+                    </td>
+                </tr>`;
+            }).join('');
+
+            const groups = {};
+            filtered.forEach(c => { const d = c.domain||'(unknown)'; (groups[d]=groups[d]||[]).push(c); });
+            document.getElementById('domainGroups').innerHTML = Object.keys(groups).sort().map(d => `
+                <div class="domain-section">
+                    <div class="domain-title glow-cyan"># ${esc(d)} (${groups[d].length})</div>
+                    ${groups[d].map(c => `<div class="domain-item"><span class="name">${esc(c.name)}</span><span class="value">${esc(decode?tryDecode(c.value):c.value)}</span></div>`).join('')}
+                </div>
+            `).join('');
+        }
+
+        function copy() {
+            navigator.clipboard.writeText(document.getElementById('stringOut').textContent)
+                .then(() => toast('Copied to clipboard'))
+                .catch(() => toast('Copy failed'));
+        }
+
+        function toEpoch(expires) {
+            if (!expires || expires === 'Session') return 0;
+            const d = new Date(expires);
+            return Number.isNaN(d.getTime()) ? 0 : Math.floor(d.getTime() / 1000);
+        }
+
+        function exportAs(f) {
+            let content, name;
+            if (f === 'json') { content = JSON.stringify(cookies, null, 2); name = 'cookies.json'; }
+            else if (f === 'netscape') {
+                content = '# Netscape HTTP Cookie File\n' + cookies.map(c => `${c.domain}\tTRUE\t${c.path}\t${c.secure?'TRUE':'FALSE'}\t${toEpoch(c.expires)}\t${c.name}\t${c.value}`).join('\n');
+                name = 'cookies.txt';
+            } else {
+                content = `curl -H "Cookie: ${cookies.map(c=>`${c.name}=${c.value}`).join('; ')}" [URL]`;
+                name = 'curl.txt';
+            }
+            const a = document.createElement('a');
+            const url = URL.createObjectURL(new Blob([content]));
+            a.href = url;
+            a.download = name;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 0);
+            toast('Exported: ' + name);
+        }
+
+        function clearAll() {
+            document.getElementById('input').value = '';
+            document.getElementById('search').value = '';
+            document.getElementById('empty').style.display = 'block';
+            document.getElementById('output').style.display = 'none';
+            document.getElementById('toolbar').style.display = 'none';
+            updateFormatLabel('unknown');
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('statusCount').textContent = '0';
+            document.getElementById('statusDomains').textContent = '0';
+            cookies = [];
+        }
+
+        function loadExample() {
+            document.getElementById('input').value = `# GitHub Cookies
+_device_id\t53a0425c0b0f99d4f9765e78ddbe7f94\tgithub.com\t/\t2027-01-31\t42\t✓\t✓\tLax
+user_session\tDqo5rQjCPvdBGp7SL7EOwI\tgithub.com\t/\t2026-02-14\t60\t✓\t✓\tStrict
+logged_in\tyes\t.github.com\t/\t2027-01-31\t12\t✓\t✓\tLax
+_gh_sess\ttZZhnVxzPs9W%2Bp8M1lnsGT81\tgithub.com\t/\tSession\t100\t✓\t✓\tLax`;
+            toast('Example loaded');
+        }
+
+        function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+        function tryDecode(s) { try { return decodeURIComponent(s); } catch { return s; } }
+        function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    </script>
+</body>
+</html>

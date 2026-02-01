@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Converter - 模板入口</title>
+    <meta name="theme-color" content="#f6f2ea">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+        :root {
+            --bg: #f6f2ea;
+            --ink: #1f1a14;
+            --muted: #6c6258;
+            --card: rgba(255, 255, 255, 0.78);
+            --border: rgba(31, 26, 20, 0.12);
+            --accent: #ff6b4a;
+            --accent-strong: #e54f2e;
+            --shadow: 0 20px 60px rgba(31, 26, 20, 0.18);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background:
+                radial-gradient(1200px 800px at 10% -10%, rgba(255, 196, 130, 0.45), transparent 60%),
+                radial-gradient(900px 700px at 100% 10%, rgba(120, 204, 255, 0.35), transparent 55%),
+                linear-gradient(180deg, #f6f2ea 0%, #f4efe7 50%, #f3efe9 100%);
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 48px 20px 64px;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 999px;
+            filter: blur(60px);
+            opacity: 0.5;
+            z-index: -1;
+            animation: float 16s ease-in-out infinite;
+        }
+
+        body::before {
+            width: 360px;
+            height: 360px;
+            background: rgba(255, 107, 74, 0.35);
+            top: 10%;
+            left: -120px;
+        }
+
+        body::after {
+            width: 420px;
+            height: 420px;
+            background: rgba(46, 204, 169, 0.3);
+            bottom: -140px;
+            right: -140px;
+            animation-delay: -8s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-18px) translateX(18px); }
+        }
+
+        .shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            align-items: center;
+            padding: 28px;
+            border-radius: 28px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+        }
+
+        .eyebrow {
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(32px, 4vw, 46px);
+            line-height: 1.1;
+            margin-bottom: 14px;
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 22px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 12px 24px rgba(255, 107, 74, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(255, 107, 74, 0.4);
+        }
+
+        .btn-ghost {
+            border: 1px solid var(--border);
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .hero-card {
+            background: #1d1a16;
+            color: #f7f2eb;
+            padding: 22px;
+            border-radius: 22px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .hero-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .hero-card p {
+            font-size: 13px;
+            color: rgba(247, 242, 235, 0.7);
+            line-height: 1.5;
+        }
+
+        .hero-list {
+            display: grid;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .hero-list span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(247, 242, 235, 0.85);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            position: relative;
+            padding: 22px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            text-decoration: none;
+            color: inherit;
+            display: grid;
+            gap: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-height: 190px;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 40px rgba(31, 26, 20, 0.18);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            border: 1px solid transparent;
+        }
+
+        .card[data-variant="default"] {
+            border-color: rgba(59, 130, 246, 0.25);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(255, 255, 255, 0.8));
+        }
+
+        .card[data-variant="default"] .badge {
+            background: rgba(59, 130, 246, 0.12);
+            border-color: rgba(59, 130, 246, 0.2);
+            color: #1e3a8a;
+        }
+
+        .card[data-variant="glass"] {
+            border-color: rgba(236, 72, 153, 0.25);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(14, 165, 233, 0.12));
+        }
+
+        .card[data-variant="glass"] .badge {
+            background: rgba(236, 72, 153, 0.15);
+            border-color: rgba(236, 72, 153, 0.2);
+            color: #9d174d;
+        }
+
+        .card[data-variant="terminal"] {
+            background: #0b0f0d;
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #e9ffe9;
+        }
+
+        .card[data-variant="terminal"] p {
+            color: rgba(233, 255, 233, 0.7);
+        }
+
+        .card[data-variant="terminal"] .badge {
+            background: rgba(34, 197, 94, 0.18);
+            border-color: rgba(34, 197, 94, 0.35);
+            color: #86efac;
+        }
+
+        .card[data-variant="minimal"] {
+            border-color: rgba(15, 23, 42, 0.15);
+            background: #ffffff;
+        }
+
+        .card[data-variant="minimal"] .badge {
+            background: #111111;
+            color: #ffffff;
+        }
+
+        footer {
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; }
+            .grid { grid-template-columns: 1fr; }
+            body { padding: 32px 16px 48px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header class="hero">
+            <div>
+                <div class="eyebrow">Cookie Converter</div>
+                <h1>四套模板，一键进入</h1>
+                <p class="sub">选择你喜欢的界面风格开始转换 Cookie 格式。每个模板都支持字符串、表格与域名视图。</p>
+                <div class="actions">
+                    <a class="btn btn-primary" href="v1-default/index.html">进入默认版</a>
+                    <a class="btn btn-ghost" href="v2-glass/index.html">进入玻璃版</a>
+                </div>
+            </div>
+            <div class="hero-card">
+                <h3>功能概览</h3>
+                <p>四个模板都支持 JSON / Netscape / DevTools 表格格式解析。</p>
+                <div class="hero-list">
+                    <span>• URL 解码 + 复制导出</span>
+                    <span>• 视图切换 + 域名分组</span>
+                    <span>• 敏感 Cookie 识别</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="grid">
+            <a class="card" data-variant="default" href="v1-default/index.html">
+                <h2>默认版 · 完整功能</h2>
+                <p>含历史记录、主题切换、搜索筛选等完整工具集。</p>
+                <div class="badges">
+                    <span class="badge">历史记录</span>
+                    <span class="badge">主题切换</span>
+                    <span class="badge">拖拽导入</span>
+                </div>
+            </a>
+
+            <a class="card" data-variant="glass" href="v2-glass/index.html">
+                <h2>玻璃版 · 霓虹氛围</h2>
+                <p>玻璃质感与发光背景，适合展示与演示场景。</p>
+                <div class="badges">
+                    <span class="badge">玻璃拟态</span>
+                    <span class="badge">主题切换</span>
+                    <span class="badge">动效背景</span>
+                </div>
+            </a>
+
+            <a class="card" data-variant="terminal" href="v3-terminal/index.html">
+                <h2>终端版 · 极客风格</h2>
+                <p>CRT 扫描线 + 命令行日志输出，适合脚本党。</p>
+                <div class="badges">
+                    <span class="badge">grep 搜索</span>
+                    <span class="badge">日志输出</span>
+                    <span class="badge">终端视觉</span>
+                </div>
+            </a>
+
+            <a class="card" data-variant="minimal" href="v4-minimal/index.html">
+                <h2>极简版 · 纯净界面</h2>
+                <p>留白 + 轻量操作，专注快速转换与导出。</p>
+                <div class="badges">
+                    <span class="badge">极简布局</span>
+                    <span class="badge">过滤搜索</span>
+                    <span class="badge">快速导出</span>
+                </div>
+            </a>
+        </section>
+
+        <footer>提示：可以把 Cookie 直接粘贴到左侧输入区，Ctrl + Enter 快速转换。</footer>
+    </main>
+</body>
+</html>

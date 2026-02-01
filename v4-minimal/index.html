@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Converter</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #fafafa;
+            --card: #ffffff;
+            --border: #eaeaea;
+            --text: #111;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --accent: #000;
+            --accent-light: #f5f5f5;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000;
+                --card: #111;
+                --border: #222;
+                --text: #fff;
+                --text-secondary: #888;
+                --text-muted: #555;
+                --accent: #fff;
+                --accent-light: #1a1a1a;
+            }
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 48px;
+        }
+
+        .logo {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        nav {
+            display: flex;
+            gap: 24px;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.15s;
+        }
+
+        nav a:hover { color: var(--text); }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .card-body {
+            padding: 0;
+        }
+
+        /* Input */
+        textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 20px;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            resize: none;
+        }
+
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        textarea:focus {
+            outline: none;
+        }
+
+        .input-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn:hover {
+            border-color: var(--text);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .checkbox input {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Output */
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .stats {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stats strong {
+            color: var(--text);
+        }
+
+        .toolbar {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .format-pill {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .search {
+            flex: 1;
+            max-width: 200px;
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text);
+            font-size: 12px;
+        }
+
+        .search:focus {
+            outline: none;
+            border-color: var(--text);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--accent-light);
+            padding: 3px;
+            border-radius: 8px;
+        }
+
+        .tab {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tab:hover { color: var(--text); }
+
+        .tab.active {
+            background: var(--card);
+            color: var(--text);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .output-content {
+            padding: 20px;
+            min-height: 300px;
+            max-height: 400px;
+            overflow: auto;
+        }
+
+        /* String */
+        .string-box {
+            background: var(--accent-light);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'SF Mono', monospace;
+            font-size: 12px;
+            line-height: 1.7;
+            word-break: break-all;
+        }
+
+        .export-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 12px 0;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .name {
+            font-family: monospace;
+            font-weight: 500;
+        }
+
+        .value {
+            font-family: monospace;
+            color: var(--text-secondary);
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 500;
+            margin-right: 4px;
+            background: var(--accent-light);
+            color: var(--text-secondary);
+        }
+
+        .tag-warn {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .tag-expired {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .tag-warn { background: #422006; color: #fbbf24; }
+            .tag-expired { background: #4c0519; color: #fda4af; }
+        }
+
+        /* Domain */
+        .domain-group {
+            margin-bottom: 24px;
+        }
+
+        .domain-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .domain-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        /* Empty */
+        .empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .btn:focus-visible,
+        .tab:focus-visible,
+        .search:focus-visible {
+            outline: 2px solid var(--text);
+            outline-offset: 2px;
+        }
+
+        /* Warning */
+        .warning {
+            background: #fef3c7;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #92400e;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .warning { background: #422006; color: #fcd34d; }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text);
+            color: var(--bg);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 13px;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+            .container { padding: 24px 16px; }
+            header { margin-bottom: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Cookie <span>Converter</span></div>
+            <nav>
+                <a href="#" onclick="loadExample();return false">Example</a>
+                <a href="https://github.com" target="_blank">GitHub</a>
+            </nav>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Input</span>
+                </div>
+                <div class="card-body">
+                    <textarea id="input" placeholder="Paste cookie data here..."></textarea>
+                </div>
+                <div class="input-footer">
+                    <button class="btn btn-primary" onclick="convert()">Convert</button>
+                    <button class="btn" onclick="clearAll()">Clear</button>
+                    <label class="checkbox">
+                        <input type="checkbox" id="urlDecode" checked>
+                        URL Decode
+                    </label>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="output-header">
+                        <span class="card-title">Output</span>
+                        <span class="stats" id="stats" style="display:none">
+                            <span class="format-pill" id="formatLabel">AUTO</span>
+                            <span><strong id="count">0</strong> cookies</span>
+                            <span>·</span>
+                            <span><strong id="domains">0</strong> domains</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="toolbar" id="toolbar" style="display:none">
+                    <input class="search" type="text" id="search" placeholder="Filter..." oninput="render()">
+                    <div class="tabs">
+                        <button class="tab active" data-view="string">String</button>
+                        <button class="tab" data-view="table">Table</button>
+                        <button class="tab" data-view="domain">Domain</button>
+                    </div>
+                </div>
+                <div class="output-content">
+                    <div id="empty" class="empty">
+                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18"/>
+                        </svg>
+                        <div>Paste cookie data to begin</div>
+                    </div>
+
+                    <div id="output" style="display:none">
+                        <div id="warning" class="warning" style="display:none"></div>
+
+                        <div id="viewString" class="view active">
+                            <div class="string-box" id="stringOut"></div>
+                            <div class="export-row">
+                                <button class="btn btn-primary btn-sm" onclick="copy()">Copy</button>
+                                <button class="btn btn-sm" onclick="exportAs('json')">JSON</button>
+                                <button class="btn btn-sm" onclick="exportAs('netscape')">Netscape</button>
+                                <button class="btn btn-sm" onclick="exportAs('curl')">cURL</button>
+                            </div>
+                        </div>
+
+                        <div id="viewTable" class="view">
+                            <table>
+                                <thead><tr><th>Name</th><th>Value</th><th>Domain</th><th>Attrs</th></tr></thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+
+                        <div id="viewDomain" class="view">
+                            <div id="domainGroups"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <script>
+        let cookies = [];
+        const SENS = ['session','token','auth','key','secret','password','jwt'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.tab').forEach(t => {
+                t.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+                    t.classList.add('active');
+                    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                    document.getElementById('view' + capitalize(t.dataset.view)).classList.add('active');
+                });
+            });
+
+            document.getElementById('input').addEventListener('keydown', e => {
+                if (e.ctrlKey && e.key === 'Enter') convert();
+            });
+
+            document.getElementById('urlDecode').addEventListener('change', () => { if (cookies.length) render(); });
+        });
+
+        function convert() {
+            const input = document.getElementById('input').value;
+            if (!input.trim()) { toast('Enter data first'); return; }
+            try {
+                const fmt = detectFormat(input);
+                cookies = parse(input);
+                if (!cookies.length) { toast('No cookies found'); return; }
+                document.getElementById('empty').style.display = 'none';
+                document.getElementById('output').style.display = 'block';
+                document.getElementById('stats').style.display = 'flex';
+                document.getElementById('toolbar').style.display = 'flex';
+                updateFormatLabel(fmt);
+                render();
+            } catch (e) { toast('Parse error'); }
+        }
+
+        function detectFormat(t) {
+            const s = t.trim();
+            if (!s) return 'unknown';
+            if (s.startsWith('[') || s.startsWith('{')) return 'json';
+            if (s.includes('# Netscape') || /^(TRUE|FALSE)\t/.test(s.split('\n')[0])) return 'netscape';
+            return 'table';
+        }
+
+        function updateFormatLabel(fmt) {
+            const map = { json: 'JSON', netscape: 'Netscape', table: 'Table', unknown: 'AUTO' };
+            const el = document.getElementById('formatLabel');
+            if (el) el.textContent = map[fmt] || fmt;
+        }
+
+        function parse(t) {
+            t = t.trim();
+            if (t.startsWith('[') || t.startsWith('{')) {
+                let d = JSON.parse(t);
+                if (!Array.isArray(d)) d = [d];
+                return d.map(c => ({ name: c.name||'', value: c.value||'', domain: c.domain||'', path: c.path||'/', expires: c.expirationDate ? new Date(c.expirationDate*1000).toISOString() : (c.expires||''), httpOnly: c.httpOnly, secure: c.secure, sameSite: c.sameSite||'' })).filter(c => c.name);
+            }
+            if (t.includes('# Netscape') || /^(TRUE|FALSE)\t/.test(t.split('\n')[0])) {
+                const arr = [];
+                for (const line of t.split('\n')) {
+                    const tr = line.trim();
+                    if (!tr || tr.startsWith('#')) continue;
+                    const p = tr.split('\t');
+                    if (p.length >= 7) arr.push({ name: p[5], value: p[6], domain: p[0], path: p[2], expires: p[4]!=='0'?new Date(p[4]*1000).toISOString():'Session', httpOnly: p[1]==='TRUE', secure: p[3]==='TRUE', sameSite: '' });
+                }
+                return arr;
+            }
+            const arr = [], seen = new Map();
+            for (const line of t.split('\n')) {
+                const tr = line.trim();
+                if (!tr || tr.startsWith('#')) continue;
+                const p = tr.includes('\t') ? tr.split('\t') : tr.split(/  +/);
+                if (p.length < 2) continue;
+                const name = p[0].trim(), value = p[1].trim();
+                if (!/^[a-zA-Z0-9!#$%&'*+\-.^_`|~]+$/.test(name)) continue;
+                const c = { name, value, domain: p[2]?.trim()||'', path: p[3]?.trim()||'/', expires: p[4]?.trim()||'', httpOnly: p[6]?.includes('✓'), secure: p[7]?.includes('✓'), sameSite: p[8]?.trim()||'' };
+                seen.has(name) ? arr[seen.get(name)] = c : (seen.set(name, arr.length), arr.push(c));
+            }
+            return arr;
+        }
+
+        function render() {
+            const decode = document.getElementById('urlDecode').checked;
+            const search = document.getElementById('search').value.toLowerCase();
+            const filtered = cookies.filter(c => c.name.toLowerCase().includes(search) || c.value.toLowerCase().includes(search) || c.domain.toLowerCase().includes(search));
+
+            const doms = new Set(filtered.map(c => c.domain));
+            document.getElementById('count').textContent = filtered.length;
+            document.getElementById('domains').textContent = doms.size;
+
+            const sens = filtered.filter(c => SENS.some(k => c.name.toLowerCase().includes(k)));
+            const w = document.getElementById('warning');
+            if (sens.length) { w.innerHTML = `⚠️ ${sens.length} sensitive cookie(s) detected`; w.style.display = 'block'; }
+            else w.style.display = 'none';
+
+            document.getElementById('stringOut').textContent = filtered.map(c => `${c.name}=${c.value}`).join('; ');
+
+            document.getElementById('tableBody').innerHTML = filtered.map(c => {
+                const v = decode ? tryDecode(c.value) : c.value;
+                const isSens = SENS.some(k => c.name.toLowerCase().includes(k));
+                const expired = c.expires && c.expires !== 'Session' && new Date(c.expires) < new Date();
+                return `<tr>
+                    <td class="name">${esc(c.name)}</td>
+                    <td class="value" title="${esc(c.value)}">${esc(v)}</td>
+                    <td>${esc(c.domain)}</td>
+                    <td>
+                        ${c.secure?'<span class="tag">Secure</span>':''}
+                        ${c.httpOnly?'<span class="tag">HttpOnly</span>':''}
+                        ${isSens?'<span class="tag tag-warn">Sensitive</span>':''}
+                        ${(!c.expires || c.expires === 'Session')?'<span class="tag">Session</span>':''}
+                        ${expired?'<span class="tag tag-expired">Expired</span>':''}
+                    </td>
+                </tr>`;
+            }).join('');
+
+            const groups = {};
+            filtered.forEach(c => { const d = c.domain||'(unknown)'; (groups[d]=groups[d]||[]).push(c); });
+            document.getElementById('domainGroups').innerHTML = Object.keys(groups).sort().map(d => `
+                <div class="domain-group">
+                    <div class="domain-title">${esc(d)} (${groups[d].length})</div>
+                    ${groups[d].map(c => `<div class="domain-item"><span class="name">${esc(c.name)}</span><span class="value">${esc(decode?tryDecode(c.value):c.value)}</span></div>`).join('')}
+                </div>
+            `).join('');
+        }
+
+        function copy() {
+            navigator.clipboard.writeText(document.getElementById('stringOut').textContent)
+                .then(() => toast('Copied'))
+                .catch(() => toast('Copy failed'));
+        }
+
+        function toEpoch(expires) {
+            if (!expires || expires === 'Session') return 0;
+            const d = new Date(expires);
+            return Number.isNaN(d.getTime()) ? 0 : Math.floor(d.getTime() / 1000);
+        }
+
+        function exportAs(f) {
+            let content, name;
+            if (f === 'json') { content = JSON.stringify(cookies, null, 2); name = 'cookies.json'; }
+            else if (f === 'netscape') {
+                content = '# Netscape HTTP Cookie File\n' + cookies.map(c => `${c.domain}\tTRUE\t${c.path}\t${c.secure?'TRUE':'FALSE'}\t${toEpoch(c.expires)}\t${c.name}\t${c.value}`).join('\n');
+                name = 'cookies.txt';
+            } else {
+                content = `curl -H "Cookie: ${cookies.map(c=>`${c.name}=${c.value}`).join('; ')}" [URL]`;
+                name = 'curl.txt';
+            }
+            const a = document.createElement('a');
+            const url = URL.createObjectURL(new Blob([content]));
+            a.href = url;
+            a.download = name;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 0);
+            toast('Downloaded');
+        }
+
+        function clearAll() {
+            document.getElementById('input').value = '';
+            document.getElementById('search').value = '';
+            document.getElementById('empty').style.display = 'flex';
+            document.getElementById('output').style.display = 'none';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('toolbar').style.display = 'none';
+            updateFormatLabel('unknown');
+            cookies = [];
+        }
+
+        function loadExample() {
+            document.getElementById('input').value = `_device_id\t53a0425c0b0f99d4f9765e78ddbe7f94\tgithub.com\t/\t2027-01-31\t42\t✓\t✓\tLax
+user_session\tDqo5rQjCPvdBGp7SL7EOwI\tgithub.com\t/\t2026-02-14\t60\t✓\t✓\tStrict
+logged_in\tyes\t.github.com\t/\t2027-01-31\t12\t✓\t✓\tLax`;
+            toast('Example loaded');
+        }
+
+        function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+        function tryDecode(s) { try { return decodeURIComponent(s); } catch { return s; } }
+        function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    </script>
+</body>
+</html>
