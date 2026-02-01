@@ -16,6 +16,8 @@ All notable changes to this project will be documented in this file.
 - Added a shared SVG favicon and linked it across templates to avoid favicon 404s on GitHub Pages.
 - Added a Chinese README describing features, usage, and templates.
 - Added per-template SVG favicons to match each UI variant.
+- Added missing manifest links in v2/v3/v4 templates.
+- Removed external Google Fonts imports to comply with the no-network rule.
 
 Files touched:
 - `AGENTS.md`
