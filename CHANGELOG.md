@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - Added per-template SVG favicons to match each UI variant.
 - Added missing manifest links in v2/v3/v4 templates.
 - Removed external Google Fonts imports to comply with the no-network rule.
+- Added `.gitignore` to exclude IDE metadata (e.g., `.idea/`).
 
 Files touched:
 - `AGENTS.md`
